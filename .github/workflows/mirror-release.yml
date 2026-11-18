@@ -48,7 +48,7 @@ jobs:
           tag="v${{ inputs.version }}"
           if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release create "$tag" --repo "$GITHUB_REPOSITORY" \
-              --title "Filee ${{ inputs.version }} (mirror of ${{ inputs.upstream }})" \
+              --title "${{ github.event.repository.name }} ${{ inputs.version }} (mirror of ${{ inputs.upstream }})" \
               --notes "全量备份自上游 ${{ inputs.upstream }} $tag（含全部平台资产与签名）。原始发布说明见上游仓库。"
           else
             echo "release $tag 已存在，仅更新资产"
