@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           names=$(gh release view "v${{ inputs.version }}" --repo "${{ inputs.upstream }}" \
-            --json assets --jq '[.assets[].name | select(test("osx|win|SHA256SUMS")) | select(endswith(".sig") | not)] | join("\n")')
+            --json assets --jq '[.assets[].name | select(test("osx|win") or test("^Filee-[0-9.]+-SHA256SUMS\\.txt$")) | select(endswith(".sig") | not)] | join("\n")')
           test -n "$names"
           echo "将镜像以下文件："; echo "$names"
           mkdir assets && cd assets
