@@ -1,6 +1,6 @@
 name: Mirror upstream release
 
-# 把上游 release 的 macOS / Windows 资产备份到本仓库的 release。
+# 把上游 release 的全部资产备份到本仓库的 release。
 # 全程在 GitHub Runner 上下载+上传，不消耗本地流量。
 # 用法：Actions → Mirror upstream release → Run workflow，输入版本号（如 2.5.0）。
 
@@ -24,13 +24,13 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
-      - name: 下载上游 macOS/Windows 资产（排除 .sig 和 Linux）
+      - name: 下载上游全部资产
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           names=$(gh release view "v${{ inputs.version }}" --repo "${{ inputs.upstream }}" \
-            --json assets --jq '[.assets[].name | select(test("osx|win") or test("^Filee-[0-9.]+-SHA256SUMS\\.txt$")) | select(endswith(".sig") | not)] | join("\n")')
+            --json assets --jq '[.assets[].name] | join("\n")')
           test -n "$names"
           echo "将镜像以下文件："; echo "$names"
           mkdir assets && cd assets
@@ -49,7 +49,7 @@ jobs:
           if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release create "$tag" --repo "$GITHUB_REPOSITORY" \
               --title "Filee ${{ inputs.version }} (mirror of ${{ inputs.upstream }})" \
-              --notes "备份自上游 ${{ inputs.upstream }} $tag，仅含 macOS 与 Windows 平台文件。原始发布说明见上游仓库。"
+              --notes "全量备份自上游 ${{ inputs.upstream }} $tag（含全部平台资产与签名）。原始发布说明见上游仓库。"
           else
             echo "release $tag 已存在，仅更新资产"
           fi
